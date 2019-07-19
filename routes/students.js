@@ -12,10 +12,12 @@ router.get('/students/:email', passport.authenticate('basic', { session: false }
     
     db.getClient().collection('students').findOne({email}, function(err, user) {
       if (err) { 
-          res.send(err); //TODO: send info based on status code
+        res.status(500).send({error: err.message}); 
+      }else if(!user){
+        res.status(404).send('Student not found');
+      }else{
+        res.send(user);
       }
-      
-       res.send(user);
     });
     
 });
