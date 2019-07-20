@@ -14,7 +14,7 @@ router.get('/students/:email', passport.authenticate('basic', { session: false }
       if (err) { 
         res.status(500).send({error: err.message}); 
       }else if(!user){
-        res.status(404).send('Student not found');
+        res.status(400).send({error: "Student Not Found"});
       }else{
         res.send(user);
       }
