@@ -33,6 +33,24 @@ function usersNamespace(io) {
           } else if (!result.value) {
             socket.emit('list errors', `Student with email ${user.email} not found`);
           } else {
+            console.log('emit', result.value);
+            socket.emit('user_login', result.value);
+          }
+        }
+      );
+    });
+    socket.on('logout', user => {
+      socket.join(user.email);
+      db.getClient().collection('students').findOneAndUpdate(
+        { email: user.email },
+        { $set: { 'loggedIn': false } },
+        { returnOriginal: false },
+        function (err, result) {
+          if (err) {
+            socket.emit('list errors', err);
+          } else if (!result.value) {
+            socket.emit('list errors', `Student with email ${user.email} not found`);
+          } else {
             socket.emit('user_login', result.value);
           }
         }
@@ -43,6 +61,19 @@ function usersNamespace(io) {
     // TODO: add listener for logout message, update db, emit
 
     // TODO: add listener to search query
+    socket.on('search', (query, fn) => {
+      const textQuery = { $text: { $search: query } };
+      const learningTargetsQuery = { learningTargets: query };
+      const criteria = query ? { $or: [textQuery, learningTargetsQuery] } : {};
+      db.getClient().collection('students').find(criteria).sort({}).toArray(function (err, result) {
+        if (err) {
+          socket.emit('list errors', err);
+        } else {
+          console.log(result);
+          fn(result);
+        }
+      });
+    });
   });
 }
 
