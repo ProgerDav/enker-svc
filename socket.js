@@ -13,7 +13,11 @@ function usersNamespace(io) {
   const users = io.of('/users');
   users.on('connection', socket => {
     // TODO: add listener for starting chat
-
+    socket.on('start-chat', (toUser, fromUser) => {
+      if (toUser) {
+        users.in(toUser.email).emit('start-chat', fromUser);
+      }
+    });
     // TODO: add listener to chat message
 
     // TODO: add listener for editor message WYSIWIG
@@ -33,7 +37,7 @@ function usersNamespace(io) {
           } else if (!result.value) {
             socket.emit('list errors', `Student with email ${user.email} not found`);
           } else {
-            console.log('emit', result.value);
+            console.log('EMMMMMMMMMMMMMMITTTTTTTTTT', result.value);
             socket.emit('user_login', result.value);
           }
         }
