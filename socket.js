@@ -40,6 +40,7 @@ function usersNamespace(io) {
       );
     });
     socket.on('logout', user => {
+      console.log(user.email);
       socket.join(user.email);
       db.getClient().collection('students').findOneAndUpdate(
         { email: user.email },
@@ -57,7 +58,23 @@ function usersNamespace(io) {
       );
     });
     // TODO: add listener on 'disconnect' to log out user, and emit
-
+    socket.on('disconnect', user => {
+      socket.join(user.email);
+      db.getClient().collection('students').findOneAndUpdate(
+        { email: user.email },
+        { $set: { 'loggedIn': false } },
+        { returnOriginal: false },
+        function (err, result) {
+          if (err) {
+            socket.emit('list errors', err);
+          } else if (!result.value) {
+            socket.emit('list errors', `Student with email ${user.email} not found`);
+          } else {
+            socket.emit('user_login', result.value);
+          }
+        }
+      );
+    });
     // TODO: add listener for logout message, update db, emit
 
     // TODO: add listener to search query
