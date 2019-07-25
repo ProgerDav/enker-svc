@@ -19,7 +19,11 @@ function usersNamespace(io) {
       }
     });
     // TODO: add listener to chat message
-
+    socket.on('message', (msg, toUser) => {
+      if(toUser){
+        users.in(toUser.email).emit('new message', msg);
+      }
+    });
     // TODO: add listener for editor message WYSIWIG
 
     // TODO: add listener for drawing
